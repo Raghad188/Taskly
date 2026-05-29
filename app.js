@@ -5,6 +5,8 @@ const taskTitle = document.querySelector("#taskTitle");
 const taskDescription = document.querySelector("#taskDescription");
 const taskPriority = document.querySelector("#taskPriority");
 const taskReminder = document.querySelector("#taskReminder");
+const submitButton = document.querySelector("#submitButton");
+const cancelEditButton = document.querySelector("#cancelEditButton");
 const taskList = document.querySelector("#taskList");
 const emptyState = document.querySelector("#emptyState");
 const notificationButton = document.querySelector("#notificationButton");
@@ -12,6 +14,7 @@ const filterButtons = document.querySelectorAll(".filter-button");
 
 let tasks = loadTasks();
 let activeFilter = "all";
+let editingTaskId = null;
 
 renderTasks();
 scheduleReminderChecks();
@@ -22,6 +25,11 @@ taskForm.addEventListener("submit", (event) => {
   const title = taskTitle.value.trim();
 
   if (!title) {
+    return;
+  }
+
+  if (editingTaskId) {
+    updateTask(title);
     return;
   }
 
@@ -38,7 +46,7 @@ taskForm.addEventListener("submit", (event) => {
 
   saveTasks();
   renderTasks();
-  taskForm.reset();
+  resetForm();
 });
 
 taskList.addEventListener("click", (event) => {
@@ -56,13 +64,24 @@ taskList.addEventListener("click", (event) => {
     );
   }
 
+  if (event.target.matches("[data-action='edit']")) {
+    startEditingTask(taskId);
+    return;
+  }
+
   if (event.target.matches("[data-action='delete']")) {
     tasks = tasks.filter((task) => task.id !== taskId);
+
+    if (editingTaskId === taskId) {
+      resetForm();
+    }
   }
 
   saveTasks();
   renderTasks();
 });
+
+cancelEditButton.addEventListener("click", resetForm);
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -125,13 +144,60 @@ function renderTasks() {
               <p class="task-time">${formatReminder(task.reminderAt)}</p>
             </div>
           </div>
-          <button class="delete-button" data-action="delete" type="button">حذف</button>
+          <div class="task-actions">
+            <button class="edit-button" data-action="edit" type="button">تعديل</button>
+            <button class="delete-button" data-action="delete" type="button">حذف</button>
+          </div>
         </li>
       `
     )
     .join("");
 
   emptyState.classList.toggle("visible", visibleTasks.length === 0);
+}
+
+function updateTask(title) {
+  tasks = tasks.map((task) =>
+    task.id === editingTaskId
+      ? {
+          ...task,
+          title,
+          description: taskDescription.value.trim(),
+          priority: taskPriority.value,
+          reminderAt: taskReminder.value || null,
+          reminded: task.reminderAt === taskReminder.value ? task.reminded : false,
+        }
+      : task
+  );
+
+  saveTasks();
+  renderTasks();
+  resetForm();
+}
+
+function startEditingTask(taskId) {
+  const task = tasks.find((item) => item.id === taskId);
+
+  if (!task) {
+    return;
+  }
+
+  editingTaskId = taskId;
+  taskTitle.value = task.title;
+  taskDescription.value = task.description || "";
+  taskPriority.value = task.priority || "medium";
+  taskReminder.value = task.reminderAt || "";
+  submitButton.textContent = "حفظ التعديل";
+  cancelEditButton.classList.remove("hidden");
+  taskTitle.focus();
+}
+
+function resetForm() {
+  editingTaskId = null;
+  taskForm.reset();
+  taskPriority.value = "medium";
+  submitButton.textContent = "إضافة المهمة";
+  cancelEditButton.classList.add("hidden");
 }
 
 function renderDescription(description) {

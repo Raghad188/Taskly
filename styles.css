@@ -101,9 +101,23 @@ textarea {
   cursor: pointer;
 }
 
-.task-form button {
+.form-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.task-form button[type="submit"] {
   background: #23645a;
   color: #ffffff;
+}
+
+.secondary-button {
+  background: #e8e1d4;
+  color: #2f3e46;
+}
+
+.hidden {
+  display: none;
 }
 
 .filters {
@@ -192,13 +206,27 @@ textarea {
   font-size: 13px;
 }
 
+.task-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button,
 .delete-button {
   border: 0;
   border-radius: 8px;
   padding: 8px 10px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background: #dbe9e5;
+  color: #23645a;
+}
+
+.delete-button {
   background: #f3d6d2;
   color: #81291f;
-  cursor: pointer;
 }
 
 .empty-state {
@@ -224,5 +252,14 @@ textarea {
 
   .task-form {
     grid-template-columns: 1fr;
+  }
+
+  .task-item {
+    grid-template-columns: auto 1fr;
+  }
+
+  .task-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
   }
 }
