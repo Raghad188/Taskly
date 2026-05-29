@@ -131,6 +131,36 @@ textarea {
   display: none;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  min-height: 84px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e0d8ca;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.stat-item span {
+  color: #23645a;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.stat-item p {
+  margin: 0;
+  color: #66746f;
+  font-size: 13px;
+}
+
 .search-field {
   margin-bottom: 16px;
 }
@@ -274,6 +304,10 @@ textarea {
 
   .task-form {
     grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .task-item {

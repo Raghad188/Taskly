@@ -10,6 +10,10 @@ const submitButton = document.querySelector("#submitButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const taskList = document.querySelector("#taskList");
 const emptyState = document.querySelector("#emptyState");
+const totalTasksCount = document.querySelector("#totalTasksCount");
+const pendingTasksCount = document.querySelector("#pendingTasksCount");
+const completedTasksCount = document.querySelector("#completedTasksCount");
+const highPriorityTasksCount = document.querySelector("#highPriorityTasksCount");
 const notificationButton = document.querySelector("#notificationButton");
 const filterButtons = document.querySelectorAll(".filter-button");
 const priorityFilterButtons = document.querySelectorAll(".priority-filter-button");
@@ -219,6 +223,8 @@ function sendNotification(title, body) {
 function renderTasks() {
   const visibleTasks = tasks.filter(shouldShowTask);
 
+  renderStats();
+
   taskList.innerHTML = visibleTasks
     .map(
       (task) => `
@@ -245,6 +251,15 @@ function renderTasks() {
 
   emptyState.textContent = getEmptyStateMessage();
   emptyState.classList.toggle("visible", visibleTasks.length === 0);
+}
+
+function renderStats() {
+  totalTasksCount.textContent = tasks.length;
+  pendingTasksCount.textContent = tasks.filter((task) => !task.completed).length;
+  completedTasksCount.textContent = tasks.filter((task) => task.completed).length;
+  highPriorityTasksCount.textContent = tasks.filter(
+    (task) => (task.priority || "medium") === "high"
+  ).length;
 }
 
 function getEmptyStateMessage() {
