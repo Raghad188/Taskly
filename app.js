@@ -44,8 +44,8 @@ taskForm.addEventListener("submit", (event) => {
 
   tasks.unshift({
     id: createTaskId(),
-    title,
-    description: taskDescription.value.trim(),
+    title: title.slice(0, 80),
+    description: taskDescription.value.trim().slice(0, 240),
     priority: taskPriority.value,
     reminderAt: taskReminder.value || null,
     completed: false,
@@ -151,7 +151,13 @@ function loadTasks() {
     }
 
     const savedTasks = localStorage.getItem(storageKey);
-    return savedTasks ? JSON.parse(savedTasks) : [];
+    const parsedTasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+    if (!Array.isArray(parsedTasks)) {
+      return [];
+    }
+
+    return parsedTasks.map(normalizeTask).filter(Boolean);
   } catch (error) {
     console.warn("Could not load saved tasks.", error);
     return [];
@@ -176,6 +182,32 @@ function createTaskId() {
   }
 
   return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeTask(task) {
+  if (!task || typeof task !== "object" || typeof task.title !== "string") {
+    return null;
+  }
+
+  const title = task.title.trim().slice(0, 80);
+
+  if (!title) {
+    return null;
+  }
+
+  const allowedPriorities = ["high", "medium", "low"];
+  const priority = allowedPriorities.includes(task.priority) ? task.priority : "medium";
+
+  return {
+    id: typeof task.id === "string" ? task.id : createTaskId(),
+    title,
+    description: typeof task.description === "string" ? task.description.trim().slice(0, 240) : "",
+    priority,
+    reminderAt: typeof task.reminderAt === "string" ? task.reminderAt : null,
+    completed: Boolean(task.completed),
+    reminded: Boolean(task.reminded),
+    createdAt: typeof task.createdAt === "string" ? task.createdAt : new Date().toISOString(),
+  };
 }
 
 function updateNotificationButton() {
@@ -224,33 +256,71 @@ function renderTasks() {
   const visibleTasks = tasks.filter(shouldShowTask);
 
   renderStats();
-
-  taskList.innerHTML = visibleTasks
-    .map(
-      (task) => `
-        <li class="task-item ${task.completed ? "completed" : ""}" data-task-id="${task.id}">
-          <input data-action="toggle" type="checkbox" ${task.completed ? "checked" : ""} aria-label="تغيير حالة المهمة" />
-          <div>
-            <p class="task-title">${escapeHtml(task.title)}</p>
-            ${renderDescription(task.description)}
-            <div class="task-meta">
-              <span class="priority-badge priority-${task.priority || "medium"}">
-                ${formatPriority(task.priority)}
-              </span>
-              <p class="task-time">${formatReminder(task.reminderAt)}</p>
-            </div>
-          </div>
-          <div class="task-actions">
-            <button class="edit-button" data-action="edit" type="button">تعديل</button>
-            <button class="delete-button" data-action="delete" type="button">حذف</button>
-          </div>
-        </li>
-      `
-    )
-    .join("");
+  taskList.replaceChildren(...visibleTasks.map(createTaskElement));
 
   emptyState.textContent = getEmptyStateMessage();
   emptyState.classList.toggle("visible", visibleTasks.length === 0);
+}
+
+function createTaskElement(task) {
+  const taskItem = document.createElement("li");
+  taskItem.className = `task-item ${task.completed ? "completed" : ""}`;
+  taskItem.dataset.taskId = task.id;
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = task.completed;
+  checkbox.dataset.action = "toggle";
+  checkbox.setAttribute("aria-label", "تغيير حالة المهمة");
+
+  const taskContent = document.createElement("div");
+
+  const title = document.createElement("p");
+  title.className = "task-title";
+  title.textContent = task.title;
+  taskContent.append(title);
+
+  if (task.description) {
+    const description = document.createElement("p");
+    description.className = "task-description";
+    description.textContent = task.description;
+    taskContent.append(description);
+  }
+
+  const meta = document.createElement("div");
+  meta.className = "task-meta";
+
+  const priority = document.createElement("span");
+  const priorityValue = task.priority || "medium";
+  priority.className = `priority-badge priority-${priorityValue}`;
+  priority.textContent = formatPriority(priorityValue);
+
+  const reminderTime = document.createElement("p");
+  reminderTime.className = "task-time";
+  reminderTime.textContent = formatReminder(task.reminderAt);
+
+  meta.append(priority, reminderTime);
+  taskContent.append(meta);
+
+  const taskActions = document.createElement("div");
+  taskActions.className = "task-actions";
+
+  const editButton = document.createElement("button");
+  editButton.className = "edit-button";
+  editButton.dataset.action = "edit";
+  editButton.type = "button";
+  editButton.textContent = "تعديل";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-button";
+  deleteButton.dataset.action = "delete";
+  deleteButton.type = "button";
+  deleteButton.textContent = "حذف";
+
+  taskActions.append(editButton, deleteButton);
+  taskItem.append(checkbox, taskContent, taskActions);
+
+  return taskItem;
 }
 
 function renderStats() {
@@ -302,8 +372,8 @@ function updateTask(title) {
     task.id === editingTaskId
       ? {
           ...task,
-          title,
-          description: taskDescription.value.trim(),
+          title: title.slice(0, 80),
+          description: taskDescription.value.trim().slice(0, 240),
           priority: taskPriority.value,
           reminderAt: taskReminder.value || null,
           reminded: task.reminderAt === taskReminder.value ? task.reminded : false,
@@ -339,14 +409,6 @@ function resetForm() {
   taskPriority.value = "medium";
   submitButton.textContent = "إضافة المهمة";
   cancelEditButton.classList.add("hidden");
-}
-
-function renderDescription(description) {
-  if (!description) {
-    return "";
-  }
-
-  return `<p class="task-description">${escapeHtml(description)}</p>`;
 }
 
 function formatPriority(priority) {
@@ -400,10 +462,4 @@ function scheduleReminderChecks() {
       renderTasks();
     }
   }, 30000);
-}
-
-function escapeHtml(value) {
-  const element = document.createElement("div");
-  element.textContent = value;
-  return element.innerHTML;
 }

@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'"
+    />
+    <meta name="referrer" content="no-referrer" />
     <title>Taskly</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -22,12 +27,12 @@
       <form id="taskForm" class="task-form">
         <label>
           عنوان المهمة
-          <input id="taskTitle" type="text" placeholder="مثال: قراءة 20 دقيقة" required />
+          <input id="taskTitle" type="text" maxlength="80" placeholder="مثال: قراءة 20 دقيقة" required />
         </label>
 
         <label>
           وصف المهمة
-          <textarea id="taskDescription" placeholder="تفاصيل اختيارية عن المهمة"></textarea>
+          <textarea id="taskDescription" maxlength="240" placeholder="تفاصيل اختيارية عن المهمة"></textarea>
         </label>
 
         <label>
