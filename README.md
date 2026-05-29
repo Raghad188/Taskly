@@ -25,6 +25,11 @@ This project intentionally includes basic browser-side security practices:
 - Uses `no-referrer` to avoid leaking page context through referrer headers.
 - Avoids external dependencies and third-party scripts in the current static version.
 
+More details:
+
+- [Security Policy](SECURITY.md)
+- [Threat Model](docs/THREAT_MODEL.md)
+
 ## Run Locally
 
 Start a local static server from the project folder:
