@@ -131,6 +131,10 @@ textarea {
   display: none;
 }
 
+.search-field {
+  margin-bottom: 16px;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;

@@ -5,6 +5,7 @@ const taskTitle = document.querySelector("#taskTitle");
 const taskDescription = document.querySelector("#taskDescription");
 const taskPriority = document.querySelector("#taskPriority");
 const taskReminder = document.querySelector("#taskReminder");
+const taskSearch = document.querySelector("#taskSearch");
 const submitButton = document.querySelector("#submitButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const taskList = document.querySelector("#taskList");
@@ -16,6 +17,7 @@ const priorityFilterButtons = document.querySelectorAll(".priority-filter-button
 let tasks = loadTasks();
 let activeFilter = "all";
 let activePriorityFilter = "all";
+let searchQuery = "";
 let editingTaskId = null;
 
 renderTasks();
@@ -85,6 +87,11 @@ taskList.addEventListener("click", (event) => {
 });
 
 cancelEditButton.addEventListener("click", resetForm);
+
+taskSearch.addEventListener("input", () => {
+  searchQuery = taskSearch.value.trim().toLowerCase();
+  renderTasks();
+});
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -241,6 +248,10 @@ function renderTasks() {
 }
 
 function getEmptyStateMessage() {
+  if (searchQuery) {
+    return "لا توجد مهام مطابقة للبحث الحالي.";
+  }
+
   if (activePriorityFilter !== "all") {
     return `لا توجد مهام بأولوية ${formatPriority(activePriorityFilter)} ضمن هذا الفلتر.`;
   }
@@ -265,7 +276,10 @@ function shouldShowTask(task) {
   const matchesPriority =
     activePriorityFilter === "all" || (task.priority || "medium") === activePriorityFilter;
 
-  return matchesStatus && matchesPriority;
+  const searchableText = `${task.title} ${task.description || ""}`.toLowerCase();
+  const matchesSearch = !searchQuery || searchableText.includes(searchQuery);
+
+  return matchesStatus && matchesPriority && matchesSearch;
 }
 
 function updateTask(title) {
