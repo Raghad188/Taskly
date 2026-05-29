@@ -47,6 +47,16 @@ h1 {
   font-size: 36px;
 }
 
+.notification-status {
+  margin: 8px 0 0;
+  color: #66746f;
+  font-size: 13px;
+}
+
+.notification-status.warning {
+  color: #81291f;
+}
+
 .icon-button {
   width: 44px;
   height: 44px;

@@ -17,6 +17,7 @@ let activeFilter = "all";
 let editingTaskId = null;
 
 renderTasks();
+updateNotificationButton();
 scheduleReminderChecks();
 
 taskForm.addEventListener("submit", (event) => {
@@ -94,16 +95,30 @@ filterButtons.forEach((button) => {
 
 notificationButton.addEventListener("click", async () => {
   if (!("Notification" in window)) {
-    alert("المتصفح لا يدعم إشعارات التذكير.");
+    showNotificationStatus("المتصفح لا يدعم الإشعارات.", true);
     return;
   }
 
-  const permission = await Notification.requestPermission();
+  try {
+    const permission = await Notification.requestPermission();
 
-  if (permission === "granted") {
-    new Notification("تم تفعيل التذكيرات", {
-      body: "سأذكّرك بالمهام عند وقتها طالما الصفحة مفتوحة.",
-    });
+    if (permission === "granted") {
+      showNotificationStatus("الإشعارات مفعلة. سأذكّرك بالمهام طالما الصفحة مفتوحة.");
+      sendNotification("تم تفعيل التذكيرات", "سأذكّرك بالمهام عند وقتها طالما الصفحة مفتوحة.");
+      updateNotificationButton();
+      return;
+    }
+
+    if (permission === "denied") {
+      showNotificationStatus("الإشعارات مرفوضة من إعدادات المتصفح.", true);
+      updateNotificationButton();
+      return;
+    }
+
+    showNotificationStatus("لم يتم تفعيل الإشعارات بعد.", true);
+  } catch (error) {
+    console.warn("Could not request notification permission.", error);
+    showNotificationStatus("تعذر تفعيل الإشعارات من هذا المتصفح.", true);
   }
 });
 
@@ -139,6 +154,48 @@ function createTaskId() {
   }
 
   return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function updateNotificationButton() {
+  if (!("Notification" in window)) {
+    notificationButton.textContent = "🔕";
+    notificationButton.title = "المتصفح لا يدعم الإشعارات";
+    showNotificationStatus("المتصفح لا يدعم الإشعارات.", true);
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    notificationButton.textContent = "🔔";
+    notificationButton.title = "الإشعارات مفعلة";
+    showNotificationStatus("الإشعارات مفعلة");
+    return;
+  }
+
+  if (Notification.permission === "denied") {
+    notificationButton.textContent = "🔕";
+    notificationButton.title = "الإشعارات مرفوضة من إعدادات المتصفح";
+    showNotificationStatus("الإشعارات مرفوضة من إعدادات المتصفح.", true);
+    return;
+  }
+
+  notificationButton.textContent = "🔔";
+  notificationButton.title = "تفعيل التذكيرات";
+  showNotificationStatus("الإشعارات غير مفعلة");
+}
+
+function showNotificationStatus(message, isWarning = false) {
+  const notificationStatus = document.querySelector("#notificationStatus");
+  notificationStatus.textContent = message;
+  notificationStatus.classList.toggle("warning", isWarning);
+}
+
+function sendNotification(title, body) {
+  try {
+    new Notification(title, { body });
+  } catch (error) {
+    console.warn("Could not send notification.", error);
+    alert(`${title}\n${body}`);
+  }
 }
 
 function renderTasks() {
@@ -283,9 +340,7 @@ function scheduleReminderChecks() {
         task.reminderAt &&
         new Date(task.reminderAt).getTime() <= now
       ) {
-        new Notification("تذكير بمهمة", {
-          body: task.title,
-        });
+        sendNotification("تذكير بمهمة", task.title);
 
         changed = true;
         return { ...task, reminded: true };
