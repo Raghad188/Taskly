@@ -14,6 +14,9 @@ const totalTasksCount = document.querySelector("#totalTasksCount");
 const pendingTasksCount = document.querySelector("#pendingTasksCount");
 const completedTasksCount = document.querySelector("#completedTasksCount");
 const highPriorityTasksCount = document.querySelector("#highPriorityTasksCount");
+const completionRate = document.querySelector("#completionRate");
+const completionBar = document.querySelector("#completionBar");
+const visibleTasksCount = document.querySelector("#visibleTasksCount");
 const notificationButton = document.querySelector("#notificationButton");
 const filterButtons = document.querySelectorAll(".filter-button");
 const priorityFilterButtons = document.querySelectorAll(".priority-filter-button");
@@ -255,7 +258,7 @@ function sendNotification(title, body) {
 function renderTasks() {
   const visibleTasks = tasks.filter(shouldShowTask);
 
-  renderStats();
+  renderStats(visibleTasks.length);
   taskList.replaceChildren(...visibleTasks.map(createTaskElement));
 
   emptyState.textContent = getEmptyStateMessage();
@@ -323,13 +326,21 @@ function createTaskElement(task) {
   return taskItem;
 }
 
-function renderStats() {
-  totalTasksCount.textContent = tasks.length;
-  pendingTasksCount.textContent = tasks.filter((task) => !task.completed).length;
-  completedTasksCount.textContent = tasks.filter((task) => task.completed).length;
+function renderStats(visibleCount) {
+  const totalCount = tasks.length;
+  const completedCount = tasks.filter((task) => task.completed).length;
+  const pendingCount = totalCount - completedCount;
+  const completionPercentage = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  totalTasksCount.textContent = totalCount;
+  pendingTasksCount.textContent = pendingCount;
+  completedTasksCount.textContent = completedCount;
   highPriorityTasksCount.textContent = tasks.filter(
     (task) => (task.priority || "medium") === "high"
   ).length;
+  completionRate.textContent = `${completionPercentage}%`;
+  completionBar.style.width = `${completionPercentage}%`;
+  visibleTasksCount.textContent = `${visibleCount} ${visibleCount === 1 ? "مهمة ظاهرة" : "مهام ظاهرة"}`;
 }
 
 function getEmptyStateMessage() {

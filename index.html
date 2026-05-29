@@ -15,8 +15,9 @@
     <main class="app-shell">
       <section class="toolbar" aria-label="إدارة المهام">
         <div>
-          <p class="eyebrow">Taskly</p>
+          <p class="eyebrow">Taskly Secure Tasks</p>
           <h1>مهامي اليوم</h1>
+          <p class="hero-copy">إدارة مهام يومية بتجربة بسيطة، وتطبيق واعي بأساسيات أمان الواجهة.</p>
           <p id="notificationStatus" class="notification-status">الإشعارات غير مفعلة</p>
         </div>
         <button id="notificationButton" class="icon-button" type="button" title="تفعيل التذكيرات">
@@ -71,6 +72,19 @@
         <div class="stat-item">
           <span id="highPriorityTasksCount">0</span>
           <p>عالية الأولوية</p>
+        </div>
+      </section>
+
+      <section class="progress-panel" aria-label="تقدم الإنجاز">
+        <div class="progress-header">
+          <div>
+            <p class="section-label">تقدم اليوم</p>
+            <strong id="completionRate">0%</strong>
+          </div>
+          <p id="visibleTasksCount">0 مهام ظاهرة</p>
+        </div>
+        <div class="progress-track">
+          <span id="completionBar"></span>
         </div>
       </section>
 
