@@ -6,6 +6,7 @@ const taskDescription = document.querySelector("#taskDescription");
 const taskPriority = document.querySelector("#taskPriority");
 const taskReminder = document.querySelector("#taskReminder");
 const taskSearch = document.querySelector("#taskSearch");
+const taskSort = document.querySelector("#taskSort");
 const submitButton = document.querySelector("#submitButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const taskList = document.querySelector("#taskList");
@@ -24,6 +25,7 @@ const priorityFilterButtons = document.querySelectorAll(".priority-filter-button
 let tasks = loadTasks();
 let activeFilter = "all";
 let activePriorityFilter = "all";
+let activeSort = "newest";
 let searchQuery = "";
 let editingTaskId = null;
 
@@ -97,6 +99,11 @@ cancelEditButton.addEventListener("click", resetForm);
 
 taskSearch.addEventListener("input", () => {
   searchQuery = taskSearch.value.trim().toLowerCase();
+  renderTasks();
+});
+
+taskSort.addEventListener("change", () => {
+  activeSort = taskSort.value;
   renderTasks();
 });
 
@@ -256,7 +263,7 @@ function sendNotification(title, body) {
 }
 
 function renderTasks() {
-  const visibleTasks = tasks.filter(shouldShowTask);
+  const visibleTasks = tasks.filter(shouldShowTask).sort(compareTasks);
 
   renderStats(visibleTasks.length);
   taskList.replaceChildren(...visibleTasks.map(createTaskElement));
@@ -339,7 +346,8 @@ function renderStats(visibleCount) {
     (task) => (task.priority || "medium") === "high"
   ).length;
   completionRate.textContent = `${completionPercentage}%`;
-  completionBar.style.width = `${completionPercentage}%`;
+  completionBar.value = completionPercentage;
+  completionBar.textContent = `${completionPercentage}%`;
   visibleTasksCount.textContent = `${visibleCount} ${visibleCount === 1 ? "مهمة ظاهرة" : "مهام ظاهرة"}`;
 }
 
@@ -376,6 +384,36 @@ function shouldShowTask(task) {
   const matchesSearch = !searchQuery || searchableText.includes(searchQuery);
 
   return matchesStatus && matchesPriority && matchesSearch;
+}
+
+function compareTasks(firstTask, secondTask) {
+  if (activeSort === "priority") {
+    return getPriorityRank(secondTask.priority) - getPriorityRank(firstTask.priority);
+  }
+
+  if (activeSort === "reminder") {
+    return getReminderTime(firstTask) - getReminderTime(secondTask);
+  }
+
+  return new Date(secondTask.createdAt).getTime() - new Date(firstTask.createdAt).getTime();
+}
+
+function getPriorityRank(priority) {
+  const ranks = {
+    high: 3,
+    medium: 2,
+    low: 1,
+  };
+
+  return ranks[priority] || ranks.medium;
+}
+
+function getReminderTime(task) {
+  if (!task.reminderAt) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return new Date(task.reminderAt).getTime();
 }
 
 function updateTask(title) {

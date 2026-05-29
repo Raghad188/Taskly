@@ -83,9 +83,7 @@
           </div>
           <p id="visibleTasksCount">0 مهام ظاهرة</p>
         </div>
-        <div class="progress-track">
-          <span id="completionBar"></span>
-        </div>
+        <progress id="completionBar" class="progress-track" max="100" value="0">0%</progress>
       </section>
 
       <label class="search-field">
@@ -107,6 +105,20 @@
       </section>
 
       <section>
+        <div class="list-toolbar">
+          <div>
+            <p class="section-label">قائمة المهام</p>
+            <h2>المهام الحالية</h2>
+          </div>
+          <label class="sort-field">
+            ترتيب حسب
+            <select id="taskSort">
+              <option value="newest">الأحدث</option>
+              <option value="priority">الأولوية</option>
+              <option value="reminder">وقت التذكير</option>
+            </select>
+          </label>
+        </div>
         <ul id="taskList" class="task-list" aria-live="polite"></ul>
         <p id="emptyState" class="empty-state">لا توجد مهام بعد. أضف أول مهمة وخلينا نبدأ.</p>
       </section>
