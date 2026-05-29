@@ -18,7 +18,9 @@ body {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -56,7 +58,7 @@ h1 {
 
 .task-form {
   display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr 1fr auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 16px;
@@ -73,7 +75,9 @@ label {
   font-size: 14px;
 }
 
-input {
+input,
+select,
+textarea {
   width: 100%;
   min-height: 42px;
   border: 1px solid #d7d0c4;
@@ -81,6 +85,11 @@ input {
   padding: 10px 12px;
   background: #ffffff;
   color: #1f2933;
+}
+
+textarea {
+  min-height: 42px;
+  resize: vertical;
 }
 
 .task-form button,
@@ -140,6 +149,41 @@ input {
 .task-title {
   margin: 0 0 4px;
   font-weight: 700;
+}
+
+.task-description {
+  margin: 0 0 8px;
+  color: #40514f;
+  font-size: 14px;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority-badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.priority-high {
+  background: #f3d6d2;
+  color: #81291f;
+}
+
+.priority-medium {
+  background: #dbe9e5;
+  color: #23645a;
+}
+
+.priority-low {
+  background: #e8e1d4;
+  color: #475569;
 }
 
 .task-time {

@@ -2,6 +2,8 @@ const storageKey = "dailyTasks";
 
 const taskForm = document.querySelector("#taskForm");
 const taskTitle = document.querySelector("#taskTitle");
+const taskDescription = document.querySelector("#taskDescription");
+const taskPriority = document.querySelector("#taskPriority");
 const taskReminder = document.querySelector("#taskReminder");
 const taskList = document.querySelector("#taskList");
 const emptyState = document.querySelector("#emptyState");
@@ -26,6 +28,8 @@ taskForm.addEventListener("submit", (event) => {
   tasks.unshift({
     id: crypto.randomUUID(),
     title,
+    description: taskDescription.value.trim(),
+    priority: taskPriority.value,
     reminderAt: taskReminder.value || null,
     completed: false,
     reminded: false,
@@ -113,7 +117,13 @@ function renderTasks() {
           <input data-action="toggle" type="checkbox" ${task.completed ? "checked" : ""} aria-label="تغيير حالة المهمة" />
           <div>
             <p class="task-title">${escapeHtml(task.title)}</p>
-            <p class="task-time">${formatReminder(task.reminderAt)}</p>
+            ${renderDescription(task.description)}
+            <div class="task-meta">
+              <span class="priority-badge priority-${task.priority || "medium"}">
+                ${formatPriority(task.priority)}
+              </span>
+              <p class="task-time">${formatReminder(task.reminderAt)}</p>
+            </div>
           </div>
           <button class="delete-button" data-action="delete" type="button">حذف</button>
         </li>
@@ -122,6 +132,24 @@ function renderTasks() {
     .join("");
 
   emptyState.classList.toggle("visible", visibleTasks.length === 0);
+}
+
+function renderDescription(description) {
+  if (!description) {
+    return "";
+  }
+
+  return `<p class="task-description">${escapeHtml(description)}</p>`;
+}
+
+function formatPriority(priority) {
+  const priorities = {
+    high: "عالية",
+    medium: "متوسطة",
+    low: "منخفضة",
+  };
+
+  return priorities[priority] || priorities.medium;
 }
 
 function formatReminder(value) {
