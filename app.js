@@ -34,7 +34,7 @@ taskForm.addEventListener("submit", (event) => {
   }
 
   tasks.unshift({
-    id: crypto.randomUUID(),
+    id: createTaskId(),
     title,
     description: taskDescription.value.trim(),
     priority: taskPriority.value,
@@ -108,12 +108,37 @@ notificationButton.addEventListener("click", async () => {
 });
 
 function loadTasks() {
-  const savedTasks = localStorage.getItem(storageKey);
-  return savedTasks ? JSON.parse(savedTasks) : [];
+  try {
+    if (typeof localStorage === "undefined") {
+      return [];
+    }
+
+    const savedTasks = localStorage.getItem(storageKey);
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  } catch (error) {
+    console.warn("Could not load saved tasks.", error);
+    return [];
+  }
 }
 
 function saveTasks() {
-  localStorage.setItem(storageKey, JSON.stringify(tasks));
+  try {
+    if (typeof localStorage === "undefined") {
+      return;
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(tasks));
+  } catch (error) {
+    console.warn("Could not save tasks.", error);
+  }
+}
+
+function createTaskId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function renderTasks() {
@@ -153,7 +178,20 @@ function renderTasks() {
     )
     .join("");
 
+  emptyState.textContent = getEmptyStateMessage();
   emptyState.classList.toggle("visible", visibleTasks.length === 0);
+}
+
+function getEmptyStateMessage() {
+  if (activeFilter === "pending") {
+    return "لا توجد مهام غير مكتملة حاليًا.";
+  }
+
+  if (activeFilter === "completed") {
+    return "لا توجد مهام مكتملة بعد.";
+  }
+
+  return "لا توجد مهام بعد. أضف أول مهمة وخلينا نبدأ.";
 }
 
 function updateTask(title) {
