@@ -103,7 +103,8 @@ textarea {
 }
 
 .task-form button,
-.filter-button {
+.filter-button,
+.priority-filter-button {
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -132,16 +133,23 @@ textarea {
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.filter-button {
+.priority-filters {
+  margin-top: -8px;
+}
+
+.filter-button,
+.priority-filter-button {
   background: #e8e1d4;
   color: #2f3e46;
 }
 
-.filter-button.active {
+.filter-button.active,
+.priority-filter-button.active {
   background: #2f3e46;
   color: #ffffff;
 }

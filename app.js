@@ -11,9 +11,11 @@ const taskList = document.querySelector("#taskList");
 const emptyState = document.querySelector("#emptyState");
 const notificationButton = document.querySelector("#notificationButton");
 const filterButtons = document.querySelectorAll(".filter-button");
+const priorityFilterButtons = document.querySelectorAll(".priority-filter-button");
 
 let tasks = loadTasks();
 let activeFilter = "all";
+let activePriorityFilter = "all";
 let editingTaskId = null;
 
 renderTasks();
@@ -88,6 +90,15 @@ filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     activeFilter = button.dataset.filter;
     filterButtons.forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    renderTasks();
+  });
+});
+
+priorityFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activePriorityFilter = button.dataset.priorityFilter;
+    priorityFilterButtons.forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
     renderTasks();
   });
@@ -199,17 +210,7 @@ function sendNotification(title, body) {
 }
 
 function renderTasks() {
-  const visibleTasks = tasks.filter((task) => {
-    if (activeFilter === "pending") {
-      return !task.completed;
-    }
-
-    if (activeFilter === "completed") {
-      return task.completed;
-    }
-
-    return true;
-  });
+  const visibleTasks = tasks.filter(shouldShowTask);
 
   taskList.innerHTML = visibleTasks
     .map(
@@ -240,6 +241,10 @@ function renderTasks() {
 }
 
 function getEmptyStateMessage() {
+  if (activePriorityFilter !== "all") {
+    return `لا توجد مهام بأولوية ${formatPriority(activePriorityFilter)} ضمن هذا الفلتر.`;
+  }
+
   if (activeFilter === "pending") {
     return "لا توجد مهام غير مكتملة حاليًا.";
   }
@@ -249,6 +254,18 @@ function getEmptyStateMessage() {
   }
 
   return "لا توجد مهام بعد. أضف أول مهمة وخلينا نبدأ.";
+}
+
+function shouldShowTask(task) {
+  const matchesStatus =
+    activeFilter === "all" ||
+    (activeFilter === "pending" && !task.completed) ||
+    (activeFilter === "completed" && task.completed);
+
+  const matchesPriority =
+    activePriorityFilter === "all" || (task.priority || "medium") === activePriorityFilter;
+
+  return matchesStatus && matchesPriority;
 }
 
 function updateTask(title) {
